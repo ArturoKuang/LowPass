@@ -4,6 +4,7 @@ var initCaman = function initCaman() {
     ReactDOM.render(React.createElement(CreateEditPage, null), document.querySelector("#caman"));
 };
 
+//image filters 
 var Filters = function Filters() {
     return React.createElement(
         "div",
@@ -242,7 +243,7 @@ var ImageGrid = function ImageGrid(props) {
 
     var tagList = null;
     if (file.metadata.tag) {
-      var _tagList = file.metadata.tag.split(' ').map(function (tag) {
+      tagList = file.metadata.tag.split(' ').map(function (tag) {
         return React.createElement(
           "a",
           { className: "ui label" },

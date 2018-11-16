@@ -21,7 +21,7 @@ const ImageGrid = function (props) {
 
     let tagList = null;
     if (file.metadata.tag) {
-      let tagList = file.metadata.tag.split(' ').map((tag) => {
+      tagList = file.metadata.tag.split(' ').map((tag) => {
         return (
           <a className="ui label">
             <i className="tag icon"> {tag} </i>
