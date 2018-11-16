@@ -5,6 +5,7 @@ const initCaman = () => {
     );
 };
 
+//image filters 
 const Filters = () => {
     return (
         <div>
