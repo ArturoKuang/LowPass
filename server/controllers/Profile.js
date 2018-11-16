@@ -1,9 +1,7 @@
-const makePage = (req, res) => {
-    return res.render('app', { csrfToken: req.csrfToken() });
-};
+const makePage = (req, res) => res.render('app', { csrfToken: req.csrfToken() });
 
 const uploadImage = (req, res) => {
-    res.json({success:"Finished uploading image."});
+  res.json({ success: 'Finished uploading image.' });
 };
 
 

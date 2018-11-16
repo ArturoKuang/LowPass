@@ -1,108 +1,108 @@
-const models = require('../models/Index');
+const models = require('../models');
 const Account = models.Account;
 
 const loginPage = (req, res) => {
-    res.render('login', { csrfToken: req.csrfToken() });
+  res.render('login', { csrfToken: req.csrfToken() });
 };
 
 const logout = (req, res) => {
-    req.session.destroy();
-    res.redirect('/');
+  req.session.destroy();
+  res.redirect('/');
 };
 
 const login = (request, response) => {
-    const req = request;
-    const res = response;
+  const req = request;
+  const res = response;
 
-    //force cast to string 
-    const username = `${req.body.username}`;
-    const password = `${req.body.pass}`;
+    // force cast to string
+  const username = `${req.body.username}`;
+  const password = `${req.body.pass}`;
 
-    if (!username || !password) {
-        return res.status(400).json({ error: 'All fields are required' });
+  if (!username || !password) {
+    return res.status(400).json({ error: 'All fields are required' });
+  }
+
+  return Account.AccountModel.authenticate(username, password, (err, account) => {
+    if (err || !account) {
+      return res.status(401).json({ error: 'Wrong username or password' });
     }
 
-    return Account.AccountModel.authenticate(username, password, (err, account) => {
-        if (err || !account) {
-            return res.status(401).json({ error: 'Wrong username or password' });
-        }
+    req.session.account = Account.AccountModel.toAPI(account);
 
-        req.session.account = Account.AccountModel.toAPI(account);
-
-        //redirect to account page 
-        return res.json({ redirect: '/account' });
-    });
+        // redirect to account page
+    return res.json({ redirect: '/account' });
+  });
 };
 
 const signup = (request, response) => {
-    const req = request;
-    const res = response;
+  const req = request;
+  const res = response;
 
-    //cast to string to cover sec. flaws
-    req.body.username = `${req.body.username}`;
-    req.body.pass = `${req.body.pass}`;
-    req.body.pass2 = `${req.body.pass2}`;
+    // cast to string to cover sec. flaws
+  req.body.username = `${req.body.username}`;
+  req.body.pass = `${req.body.pass}`;
+  req.body.pass2 = `${req.body.pass2}`;
 
-    if (!req.body.username || !req.body.pass || !req.body.pass2) {
-        return res.status(400).json({ error: 'All fields are required' });
-    }
+  if (!req.body.username || !req.body.pass || !req.body.pass2) {
+    return res.status(400).json({ error: 'All fields are required' });
+  }
 
-    if (req.body.pass !== req.body.pass2) {
-        return res.status(400).json({ error: 'Password do not match!' });
-    }
+  if (req.body.pass !== req.body.pass2) {
+    return res.status(400).json({ error: 'Password do not match!' });
+  }
 
-    return Account.AccountModel.generateHash(req.body.pass, (salt, hash) => {
-        const accountData = {
-            username: req.body.username,
-            salt,
-            password: hash,
-        };
+  return Account.AccountModel.generateHash(req.body.pass, (salt, hash) => {
+    const accountData = {
+      username: req.body.username,
+      salt,
+      password: hash,
+    };
 
-        const newAccount = new Account.AccountModel(accountData);
+    const newAccount = new Account.AccountModel(accountData);
 
-        const savePromise = newAccount.save();
+    const savePromise = newAccount.save();
 
-        savePromise.then(() => {
-            req.session.account = Account.AccountModel.toAPI(newAccount);
-            res.json({ redirect: '/account' });
-        });
-
-        savePromise.catch((err) => {
-            console.log(err);
-
-            if (err.code === 11000) {
-                return res.status(400).json({ error: 'Username already in use' });
-            }
-
-            return res.status(400).json({ error: 'An error occurred' });
-        });
+    savePromise.then(() => {
+      req.session.account = Account.AccountModel.toAPI(newAccount);
+      res.json({ redirect: '/account' });
     });
+
+    savePromise.catch((err) => {
+      console.log(err);
+
+      if (err.code === 11000) {
+        return res.status(400).json({ error: 'Username already in use' });
+      }
+
+      return res.status(400).json({ error: 'An error occurred' });
+    });
+  });
 };
 
 const getInfo = (request, response) => {
-    const req = request;
-    const res = response;
+  const req = request;
+  const res = response;
 
-    const accountData = {
-        info: req.session.account
-    };
+  const accountData = {
+    info: req.session.account,
+  };
 
-    if(!req.session.account) {
-        return res.status(400).json({error: 'Invalid Account Name'});
-    }
-    return res.json(accountData);
+  if (!req.session.account) {
+    return res.status(400).json({ error: 'Invalid Account Name' });
+  }
+  return res.json(accountData);
 };
 
 
 const getToken = (request, response) => {
-    const req = request;
-    const res = response;
+  const req = request;
+  const res = response;
 
-    const csrfToken = {
-        csrfToken: req.csrfToken(),
-    };
+  const csrfToken = {
+    csrfToken: req.csrfToken(),
+  };
 
-    res.json(csrfToken);
+  res.json(csrfToken);
 };
 
 module.exports.getInfo = getInfo;

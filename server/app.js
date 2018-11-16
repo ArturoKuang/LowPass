@@ -11,14 +11,13 @@ const session = require('express-session');
 const RedisStore = require('connect-redis')(session);
 const url = require('url');
 const csrf = require('csurf');
-const Grid = require('gridfs-stream');
 const methodOverride = require('method-override');
 
 const port = process.env.PORT || process.env.NODE_PORT || 3000;
 
 const dbURL = process.env.MONGODB_URI || 'mongodb://localhost/LowPass';
 
-//let conn;
+// let conn;
 
 mongoose.connect(dbURL, (err) => {
   if (err) {
@@ -27,8 +26,8 @@ mongoose.connect(dbURL, (err) => {
   }
 });
 
-//conn = mongoose.connection;
-//conn.on('error', console.error.bind(console, 'connection error:'));
+// conn = mongoose.connection;
+// conn.on('error', console.error.bind(console, 'connection error:'));
 
 let redisURL = {
   hostname: 'localhost',
@@ -79,10 +78,11 @@ app.use(cookieParser());
 
 app.use(csrf());
 app.use((err, req, res, next) => {
-  res.locals._csrfToken = req.csrfToken();
+  const response = res;
+  response.locals._csrfToken = req.csrfToken();
   next();
-  //if (err.code !== 'EBADCSRFTOKEN') return next(err);
-  //console.log('Missing CSRF token');
+  // if (err.code !== 'EBADCSRFTOKEN') return next(err);
+  // console.log('Missing CSRF token');
   return false;
 });
 
