@@ -6,3 +6,7 @@ div#navbar{
 img#navbarImg{
     width: 10.5em;
 }
+
+form#uploadForm{
+    margin-top: 25px;
+}

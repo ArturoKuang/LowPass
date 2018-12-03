@@ -3,6 +3,7 @@ const mid = require('./middleware');
 
 // routes to go to
 const router = (app) => {
+  app.get('/', mid.requiresSecure, mid.requiresLogout, controllers.Account.loginPage);
   app.get('/getToken', mid.requiresSecure, controllers.Account.getToken);
   app.get('/login', mid.requiresSecure, mid.requiresLogout, controllers.Account.loginPage);
   app.post('/login', mid.requiresSecure, mid.requiresLogout, controllers.Account.login);
@@ -10,17 +11,19 @@ const router = (app) => {
   app.get('/logout', mid.requiresLogin, controllers.Account.logout);
   app.get('/account', mid.requiresLogin, controllers.Profile.makePage);
   app.get('/getAccountInfo', mid.requiresLogin, controllers.Account.getInfo);
-  app.get('/', mid.requiresSecure, mid.requiresLogout, controllers.Account.loginPage);
-  app.get('/files', mid.requiresSecure, controllers.Images.getFilesJson);
-  app.get('/files/:filename', mid.requiresLogin, controllers.Images.getFileJson);
-  app.get('/image/:filename', mid.requiresLogin, controllers.Images.getImage);
-  app.delete('/files/:id', mid.requiresLogin, controllers.Images.deleteFile);
+  app.get('/files', mid.requiresLogin, controllers.Images.getAccountImages);
+  app.get('/comments', mid.requiresLogin, controllers.Comment.getImageComment);
+  app.post('/comments', mid.requiresLogin, controllers.Comment.saveComment);
+  app.post('/changePassword', mid.requiresLogin, controllers.Account.changePassword);
+  app.get('/files/public', mid.requiresLogin, controllers.Images.getAllPublicImages);
+  app.delete('/files/:id', mid.requiresLogin, controllers.Images.deleteImageS3, controllers.Images.deleteImage);
   app.post(
     '/uploadImage',
     mid.requiresLogin,
-    mid.upload.single('file'),
-    controllers.Profile.uploadImage);
+    controllers.Images.uploadImageS3.any(),
+    controllers.Images.saveImage);
 };
 
 
 module.exports = router;
+

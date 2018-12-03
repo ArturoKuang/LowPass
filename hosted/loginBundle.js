@@ -155,7 +155,7 @@ var handleError = function handleError(message) {
 };
 
 var handleSuccess = function handleSuccess(message) {
-    $("#boxSuccessMessage").text(message);
+    $("#boxSuccessMessage").text(message.success);
     $("#boxSuccessMessage").transition('fade').transition('fade', 500);
 };
 

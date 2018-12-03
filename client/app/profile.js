@@ -1,3 +1,6 @@
+var username = "";
+var timer = "";
+
 const ImageGrid = function (props) {
   if (props.files.length === 0) {
     return (
@@ -7,21 +10,13 @@ const ImageGrid = function (props) {
     );
   }
 
-  const ImageCards = props.files.map(function (file) {
-    if (
-      file.contentType !== 'image/jpeg' &&
-      file.contentType !== 'image/png'
-    ) {
-      return;
-    }
-
-    let filePath = `image/${file.filename}`;
-    let fileDate = file.uploadDate.split('T')[0];
-    let fileID = `${file._id}`;
+  const ImageCards = props.files.images.map(function (file) {
+    let filePath = `${file.url}`;
+    let fileDate = file.fileDate.split('T')[0];
 
     let tagList = null;
-    if (file.metadata.tag) {
-      tagList = file.metadata.tag.split(' ').map((tag) => {
+    if (file.tags) {
+      tagList = file.tags.split(' ').map((tag) => {
         return (
           <a className="ui label">
             <i className="tag icon"> {tag} </i>
@@ -29,12 +24,12 @@ const ImageGrid = function (props) {
         );
       });
     }
-
+    var fileKey = file.keyPath.split('/')[1];
     return (
-      <div id={file._id} key={file._id} className="ui card">
+      <div id={fileKey} key={fileKey} className="ui card">
         <div className="content">
           <div id="cardDate" className="right floated meta"> {fileDate}</div>
-          <div id="cardTitle" className="left float meta">{file.metadata.title}</div>
+          <div id="cardTitle" className="left float meta">{file.title}</div>
         </div>
         <div className="content">
           <div className="image">
@@ -53,7 +48,7 @@ const ImageGrid = function (props) {
   });
 
   return (
-    <div className="ui three cards">
+    <div className="ui relaxed three cards">
       {ImageCards}
     </div>
   );
@@ -72,9 +67,12 @@ const handleDelete = (e, id) => {
 };
 
 
-const SignUpPage = (props) => {
-
-}
+const CreatePasswordPage = (csrf) => {
+  ReactDOM.render(
+    <PasswordForm csrf={csrf} />,
+      document.querySelector('#content')
+  );
+};
 
 const AccountView = (props) => {
   return (
@@ -87,7 +85,12 @@ const AccountView = (props) => {
 const AccountInfo = (props) => {
   return (
     <div>
-      <h3>{props.name} profile: </h3>
+      <h3 className="ui header">
+        <i className="user icon"></i>
+        <div className="content">
+          {props.name} profile:
+        </div>
+      </h3>
     </div>
   );
 };
@@ -103,6 +106,7 @@ const loadImagesFromServer = (csrf) => {
 
 const loadUserInfo = (csrf) => {
   sendAjax('GET', '/getAccountInfo', null, (data) => {
+    username = data.info.username;
     ReactDOM.render(
       <AccountInfo csrf={csrf} name={data.info.username} />,
       document.querySelector('#userInfo')
@@ -121,6 +125,8 @@ const CreateAccountPage = (csrf) => {
 };
 
 const ClearBody = () => {
+  clearTimeout(timer);
+
   ReactDOM.render(
     <div></div>,
     document.querySelector('#userInfo')
@@ -150,6 +156,8 @@ const ClearCaman = () => {
 const setup = function (csrf) {
   const navUploadButton = document.querySelector("#navUploadButton");
   const navAccountButton = document.querySelector("#navAccountButton");
+  const navExploreButton = document.querySelector("#navExploreButton");
+  const navPassButton = document.querySelector("#navChangePassword");
 
   navUploadButton.addEventListener("click", (e) => {
     e.preventDefault();
@@ -168,6 +176,20 @@ const setup = function (csrf) {
     return false;
   });
 
+  navExploreButton.addEventListener("click", (e) => {
+    e.preventDefault();
+    ClearCaman();
+    ClearBody();
+    loadAllPublicImagesFromServer(csrf);
+  });
+
+  navPassButton.addEventListener("click", (e) => {
+    e.preventDefault();
+    ClearCaman();
+    ClearBody();
+    CreatePasswordPage(csrf);
+  });
+
   ClearCaman();
   CreateAccountPage(csrf);
   loadImagesFromServer(csrf);
@@ -177,6 +199,12 @@ const setup = function (csrf) {
 const getToken = () => {
   sendAjax('GET', '/getToken', null, (result) => {
     setup(result.csrfToken);
+  });
+};
+
+const getCSRF = () => {
+  sendAjax('GET', '/getToken', null, (result) => {
+    return result.csrfToken;
   });
 };
 

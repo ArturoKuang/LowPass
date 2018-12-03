@@ -17,17 +17,12 @@ const port = process.env.PORT || process.env.NODE_PORT || 3000;
 
 const dbURL = process.env.MONGODB_URI || 'mongodb://localhost/LowPass';
 
-// let conn;
-
 mongoose.connect(dbURL, (err) => {
   if (err) {
     console.log('Could not connect to database');
     throw err;
   }
 });
-
-// conn = mongoose.connection;
-// conn.on('error', console.error.bind(console, 'connection error:'));
 
 let redisURL = {
   hostname: 'localhost',
@@ -81,12 +76,29 @@ app.use((err, req, res, next) => {
   const response = res;
   response.locals._csrfToken = req.csrfToken();
   next();
-  // if (err.code !== 'EBADCSRFTOKEN') return next(err);
-  // console.log('Missing CSRF token');
   return false;
 });
 
 router(app);
+
+app.use(function(req, res, next){
+  res.status(404);
+
+  // respond with html page
+  if (req.accepts('html')) {
+    res.render('404', { url: req.url });
+    return;
+  }
+
+  // respond with json
+  if (req.accepts('json')) {
+    res.send({ error: 'Not found' });
+    return;
+  }
+
+  // default to plain-text. send()
+  res.type('txt').send('Not found');
+});
 
 app.listen(port, (err) => {
   if (err) {

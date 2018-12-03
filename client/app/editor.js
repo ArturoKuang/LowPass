@@ -45,9 +45,9 @@ const handleEdit = (e) => {
 
     img.onload = function () {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        canvas.width = img.width;
-        canvas.height = img.height;
-        ctx.drawImage(img, 0, 0, img.width, img.height);
+        canvas.width = "1000";
+        canvas.height = "1000";
+        ctx.drawImage(img, 0, 0, 1000, 1000);
     }
 
     ShowCaman();

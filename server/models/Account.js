@@ -57,6 +57,17 @@ AccountSchema.statics.findByUsername = (name, callback) => {
   return AccountModel.findOne(search, callback);
 };
 
+AccountSchema.statics.changePassword = (username, oldpassword, password, callback) =>
+  AccountModel.authenticate(username, oldpassword, (err) => {
+    if (err) return callback(err);
+    return AccountModel.generateHash(password, (salt, hash) => AccountModel.updateOne(
+      { username },
+      {
+        $set: { salt, password: hash },
+      }
+      ).exec(callback));
+});
+
 AccountSchema.statics.generateHash = (password, callback) => {
   const salt = crypto.randomBytes(saltLength);
 

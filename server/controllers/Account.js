@@ -93,6 +93,35 @@ const getInfo = (request, response) => {
   return res.json(accountData);
 };
 
+const changePassword = (request, response) => {
+  const req = request;
+  const res = response;
+
+  // force cast to strings b/c security
+  req.body.oldpassword = `${req.body.oldpassword}`;
+  req.body.pass = `${req.body.pass}`;
+  req.body.pass2 = `${req.body.pass2}`;
+
+  if (!req.body.oldpassword || !req.body.pass || !req.body.pass2) {
+    return res.status(400).json({ error: 'Error: All fields are required' });
+  }
+
+  if (req.body.pass !== req.body.pass2) {
+    return res.status(400).json({ error: 'Error: Passwords do not match' });
+  }
+
+  return Account.AccountModel.changePassword(
+    req.session.account.username,
+    req.body.oldpassword, req.body.pass,
+    (err) => {
+      if (err) {
+        res.status(400).json({ error: 'An error occurred' });
+      }
+      res.json({ success: 'Successfully changed password' });
+    }
+  );
+};
+
 
 const getToken = (request, response) => {
   const req = request;
@@ -111,3 +140,4 @@ module.exports.login = login;
 module.exports.logout = logout;
 module.exports.signup = signup;
 module.exports.getToken = getToken;
+module.exports.changePassword = changePassword;
